@@ -282,27 +282,36 @@
         navigator.serviceWorker.register('js/service-worker.js');
       }
     })();
-    var scripts = [
-      "./js/main.js",
-      "./js/animations.js",
-    ];
-    var loadCount = 0;
+var loadCount = 0;
 
-    function handleScriptLoad() {
-      loadCount++;
-      if (loadCount >= scripts.length) {
-        document.getElementById("loadScreen").remove();
-        start();
-      }
+function handleScriptLoad() {
+  loadCount++;
+  if (loadCount >= 2) {
+    document.getElementById("loadScreen").remove();
+    start();
+  }
+}
+
+var animationLoader = document.createElement("script");
+animationLoader.type = "text/javascript";
+animationLoader.src = "./js/animations.js";
+
+animationLoader.onload = function() {
+  var check = setInterval(function() {
+    if (window.meleeAnimationsLoaded) {
+      clearInterval(check);
+      handleScriptLoad();
+
+      var main = document.createElement("script");
+      main.type = "text/javascript";
+      main.onload = handleScriptLoad;
+      main.src = "./js/main.js";
+      document.body.appendChild(main);
     }
+  }, 50);
+};
 
-    scripts.forEach(function(src) {
-      var script = document.createElement("script");
-      script.type = "text/javascript";
-      script.onload = handleScriptLoad;
-      document.body.appendChild(script);
-      script.src = src;
-    });
+document.body.appendChild(animationLoader);
   </script>
   </body>
 </html>
